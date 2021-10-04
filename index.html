@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CRUD with Angular JS</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js" integrity="sha512-rTAljISl+fitBnL2/6HhbiENEHd87W0DnTh1J7CcRD/dTLTycfceHs1uQEsR83nD86ON4k9N8H8S5OwGzoA9jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body ng-app="CrudApp" ng-controller="CrudCtrl">
+
+	<table class="table">
+		<tr>
+			<th>ID</th>
+			<th>Nama Kota</th>
+		</tr>
+		<tr ng-repeat="student in murid">
+			<td>{{ student.id }}</td>
+			<td>{{ student.nama_kota }}</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript">
+
+		// buat module
+		var app = angular.module('CrudApp', []);
+
+		// buat controller
+		app.controller('CrudCtrl', function($scope, $http){
+			// request server
+			$http.get('http://localhost/php-angular-js/select.php').success(function(data){
+
+				// passing ke view
+				$scope.murid = data;
+			});
+		});
+	</script>
+</body>
+</html>
