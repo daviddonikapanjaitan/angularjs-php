@@ -9,35 +9,156 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js" integrity="sha512-rTAljISl+fitBnL2/6HhbiENEHd87W0DnTh1J7CcRD/dTLTycfceHs1uQEsR83nD86ON4k9N8H8S5OwGzoA9jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body ng-app="CrudApp" ng-controller="CrudCtrl">
 
-	<table class="table">
-		<tr>
-			<th>ID</th>
-			<th>Nama Kota</th>
-		</tr>
-		<tr ng-repeat="student in murid">
-			<td>{{ student.id }}</td>
-			<td>{{ student.nama_kota }}</td>
-		</tr>
-	</table>
+	<div class="container">
+		<br>
+
+		<div class="row">
+			<div class="col">
+				<button id="add_data" ng-click="add_data_form()" type="button" class="btn btn-primary" data-target="#exampleModal">Add Data</button>
+			</div>
+		</div>
+
+		<br>
+		<div class="row">
+			<table class="table">
+				<tr>
+					<th>ID</th>
+					<th>City Name</th>
+					<th>Actions</th>
+				</tr>
+				<tr ng-repeat="student in murid">
+					<td>{{ student.id }}</td>
+					<td>{{ student.nama_kota }}</td>
+					<td>
+						<button ng-click="update_data_form(student.id)" type="button" class="btn btn-success">Update</button>
+						<button ng-click="delete_data(student.id)" type="button" class="btn btn-warning">Delete</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalLabel">Add Data</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<div class="modal-body">
+					<form id="form_id" method="post" ng-submit="submitForm('insert')">
+						<div hidden id="insert_or_update" ng-model="insert_or_update"></div>
+						<div hidden id="id_kota_hidden" ng-model="city_id"></div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">City Name</label>
+							<input type="text" name="city" ng-model="city" class="form-control" 
+								id="exampleInputEmail1" placeholder="Enter city name">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+				  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				  <button ng-click="add_data('insert')" id="save_add_data" type="button" class="btn btn-primary">Save changes</button>
+				</div>
+			  </div>
+			</div>
+		</div>
+	</div>
 
 	<script type="text/javascript">
 
-		// buat module
 		var app = angular.module('CrudApp', []);
 
-		// buat controller
 		app.controller('CrudCtrl', function($scope, $http){
-			// request server
-			$http.get('http://localhost/php-angular-js/select.php').success(function(data){
+			load_view();
 
-				// passing ke view
-				$scope.murid = data;
-			});
+			$scope.submitForm = function(){
+				if($scope.insert_or_update == 'insert'){
+					post_api();
+				}else{
+					update_by_id();
+				}
+			};
+
+			$scope.add_data = function(){
+				if($scope.insert_or_update == 'insert'){
+					post_api();
+				}else{
+					update_by_id();
+				}
+			}
+
+			$scope.delete_data = function(delete_id){
+				delete_data(delete_id);
+			}
+
+			$scope.update_data_form = function(student_id){
+				$('#exampleModal').modal('show');
+				$scope.insert_or_update = "update";
+				get_by_id(student_id);
+			}
+
+			$scope.add_data_form = function(){
+				$scope.insert_or_update = "insert";
+			}
+
+			function post_api(){
+				$http({
+					method:"POST",
+					url:"http://localhost/php-angular-js/add_data.php",
+					data: $.param({'city':$scope.city}),
+					headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+				}).success(function(data){
+					console.log("success");
+					load_view();
+					$('#exampleModal').modal('hide');
+				});
+			}
+
+			function load_view(){
+				$http.get('http://localhost/php-angular-js/select.php').success(function(data){
+					$scope.murid = data;
+				});
+			}
+
+			function delete_data(delete_id){
+				$http.get('http://localhost/php-angular-js/delete_data.php?id_kota=' + delete_id).success(function(data){
+					load_view();
+				});
+			}
+
+			function get_by_id(id_data){
+				$http.get('http://localhost/php-angular-js/get_by_id.php?id_data=' + id_data).success(function(data){
+					$scope.city = data[0].nama_kota;
+					$scope.city_id = data[0].id;
+				});
+			}
+
+			function update_by_id(){
+				$http.get('http://localhost/php-angular-js/update_by_id.php?id_data=' + $scope.city_id +
+				  	'&new_city=' + $scope.city).success(function(data){
+					$scope.insert_or_update = "insert";
+					load_view();
+					$('#exampleModal').modal('hide');
+				});
+			}
+		});
+	</script>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script>
+
+		$("#add_data").click(function(){
+			$('#exampleModal').modal('show');
+			$("#form_id").trigger("reset");
 		});
 	</script>
 </body>

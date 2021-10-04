@@ -8,5 +8,4 @@
 	$murid = $sql->fetchall(PDO::FETCH_ASSOC);
 
 	print json_encode($murid);
-
 ?>
